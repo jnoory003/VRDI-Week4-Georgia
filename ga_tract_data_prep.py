@@ -23,6 +23,13 @@ for i in range(10):
 col_names = ["totpop", "white_pop", "black_pop","native_pop", "asian_pop", "hawaiian_pop","race_other","race_multiple","race_multiple_other", "race_multiple_excl_other","state","county","tract"]
 
 # Hispanic/Latino Origin Data
+get_vars = []
+for i in range(21):
+        if i <= 8:
+            get_vars.append("B03002" +"_00"+ str(i+1) + "E" )
+        else:
+            get_vars.append("B03002" +"_0"+ str(i+1) + "E" )
+col_names = ["total", "not_hisp_total","not_hisp_white","not_hisp_black","not_hisp_native", "not_hisp_asian","not_hisp_hawaiian", "not_hisp_other", "not_hisp_multiple", "not_hisp_multiple_other","not_hisp_multiple_excl_other","hisp_total","hisp_white","hisp_black","hisp_native", "hisp_asian", "hisp_hawaiian", "hisp_other", "hisp_multiple", "hisp_multiple_other","hisp_multiple_excl_other", "state","county","tract"]
 
 # Citizenship Voting-Age Population
 get_vars=[]
