@@ -32,28 +32,56 @@ for i in range(21):
 col_names = ["total", "not_hisp_total","not_hisp_white","not_hisp_black","not_hisp_native", "not_hisp_asian","not_hisp_hawaiian", "not_hisp_other", "not_hisp_multiple", "not_hisp_multiple_other","not_hisp_multiple_excl_other","hisp_total","hisp_white","hisp_black","hisp_native", "hisp_asian", "hisp_hawaiian", "hisp_other", "hisp_multiple", "hisp_multiple_other","hisp_multiple_excl_other", "state","county","tract"]
 
 # Citizenship Voting-Age Population
-get_vars=[]
-for i in range(23):
-    if i <= 8:
-        if i+1 == 9 or i+1 ==6 or i+1==4:
-            get_vars.append("B05003I" + "_00" + str(i+1) +"E")
-    else:
-        if i+1 in [11, 22, 20, 16, 17]:
-            get_vars.append("B05003I" + "_0" + str(i+1) + "E")
 
-col_names = ["H Male Native u18", "H Male Naturalized u18", "H Male Native o18", "H Male Naturalized o18",
-             "H Female Native u18", "H Female Naturalized u18", "H Female Native o18", "H Female Naturalized o18",
-            "state", "county", "tract"]
+races = [#"A",
+         "B",
+         "C", 
+         "D", 
+         #"E",
+         #"F",
+         #"G", 
+         "H",
+         "I"]   
 
-# Improve CVAP downloads (WIP)
 
-# race_groups=["A","B","C","D","E","F","G","H","I"] 
-# #A-G correspond to races. H and I classify non-hispanic white (H) and hispanic(I).
 
-# names= [9, 11, 20, 22]
-# get_var2 = ["B05003" + race_group + [str(name).zfill(3) + "E" for name in names] for race_group in race_groups ]
-# #get_vars3 =["B05003" + race_group[h] if race_group[h] == "I" + "_0" + str(name[i]) for i in name] 
-# get_var2
+#Loop over races to get CVAP counts and append to a dataframe. 
+get_var=[]
+df_col_names = ["MNative", "MNat", "FNative","FNat", "state", 'county', "tract"]
+ga_col_names= ['state', 'county', 'tract']
+ga_tract = pd.DataFrame(columns=ga_col_names)
+
+
+for race in races:
+    get_var= ["B05003" + str(race) + "_" + str(i+1).zfill(3) 
+              + "E" for i in range(23) if i+1 in [9, 11,20,22] ]
+    print(get_var)
+
+    predicates = {}
+    predicates["get"] = ",".join(get_var)
+    predicates["for"] = "tract:*"
+    predicates["in"] = "state:13"
+    # predicates["key"] = "YOUR_CENSUS_API_KEY"
+    print("made predicates")
+    
+    r = requests.get(base_url, params=predicates)
+    print("made request")
+    
+    # Examine the response
+    r.text
+    
+    df = pd.DataFrame(columns=df_col_names, data=r.json()[1:])
+    int_cols = df_col_names[1:-3]
+    df[int_cols] = df[int_cols].astype(int)
+    
+    ga_tract['state'] = df['state']
+    ga_tract['county'] = df['county']
+    ga_tract['tract'] = df['tract']
+    
+    ga_tract[str(race + '_CVAP' )] = df.sum(axis=1)
+
+# Save to file
+ga_tract.to_pickle("ga_tract.pickle")    
 
 
 
